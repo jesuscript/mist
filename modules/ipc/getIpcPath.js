@@ -18,6 +18,7 @@ module.exports = function(nodeType) {
     var p = require('path');
     var path = Settings.userHomePath;
 
+
     var unknownNode = () => {
         throw new Error(`unknown node type: ${nodeType}`)
     }

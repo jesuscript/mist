@@ -128,7 +128,6 @@ class EthereumNode extends EventEmitter {
      */
     init () {
 
-
         const ipcPath = getIpcPath(this.defaultNodeType);
 
         // TODO: if connection to external node is successful then query it to
@@ -368,6 +367,7 @@ class EthereumNode extends EventEmitter {
                     return reject(err);
                 }
 
+
                 let args = ({
                     main: {
                         geth: () => ['--fast', '--cache', '512'],
@@ -518,9 +518,6 @@ class EthereumNode extends EventEmitter {
 
         this.defaultNodeType = Settings.nodeType || this._loadUserData('node') || DEFAULT_NODE_TYPE;
         this.defaultNetwork = Settings.network || this._loadUserData('network') || DEFAULT_NETWORK;
-
-        console.log("##### node", this.defaultNodeType)
-        console.log(Settings.nodeType, this._loadUserData('node'), DEFAULT_NODE_TYPE)
 
         // FORK RELATED
         this.daoFork = this._loadUserData('daoFork');
