@@ -9,7 +9,7 @@ const log = require('../utils/logger').create('getIpcPath');
 const Settings = require('../settings');
 
 
-module.exports = function() {
+module.exports = function(nodeType) {
     var ipcPath = Settings.ipcPath;
     if (ipcPath) {
         return ipcPath;
@@ -18,18 +18,30 @@ module.exports = function() {
     var p = require('path');
     var path = Settings.userHomePath;
 
+    var unknownNode = () => {
+        throw new Error(`unknown node type: ${nodeType}`)
+    }
+
     if(process.platform === 'darwin') {
-        path += '/Library/Ethereum/geth.ipc';
+        path += {
+            geth: '/Library/Ethereum/geth.ipc',
+            parity: '/.parity/jsonrpc.ipc'
+        }[nodeType]  || unknownNode();
     }
 
     if(process.platform === 'freebsd' ||
        process.platform === 'linux' ||
        process.platform === 'sunos') {
-        path += '/.ethereum/geth.ipc';
+        path += {
+            geth:'/.ethereum/geth.ipc',
+            parity: '/.parity/jsonrpc.ipc'
+        }[nodeType]  || unknownNode();
     }
 
     if(process.platform === 'win32') {
-        path = '\\\\.\\pipe\\geth.ipc';
+        path = {
+            geth: '\\\\.\\pipe\\geth.ipc'
+        }[nodeType] || unknownNode();
     }
     
     log.debug(`IPC path: ${path}`);

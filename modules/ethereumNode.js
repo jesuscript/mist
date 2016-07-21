@@ -17,7 +17,7 @@ const getIpcPath = require('./ipc/getIpcPath.js')
 const Sockets = require('./sockets');
 const Settings = require('./settings');
 
-const DEFAULT_NODE_TYPE = 'geth';
+const DEFAULT_NODE_TYPE = 'parity';
 const DEFAULT_NETWORK = 'main';
 
 
@@ -75,6 +75,10 @@ class EthereumNode extends EventEmitter {
         return this._type === 'geth';
     }
 
+    get isParity () {
+        return this._type === 'parity';
+    }
+
     get isMainNetwork () {
         return 'main' === this.network;
     }
@@ -89,18 +93,18 @@ class EthereumNode extends EventEmitter {
 
     get stateAsText () {
         switch (this._state) {
-            case STATES.STARTING:
-                return 'starting';
-            case STATES.STARTED:
-                return 'started';
-            case STATES.CONNECTED:
-                return 'connected';
-            case STATES.STOPPING:
-                return 'stopping';
-            case STATES.STOPPED:
-                return 'stopped';
-            case STATES.ERROR:
-                return 'error';
+        case STATES.STARTING:
+            return 'starting';
+        case STATES.STARTED:
+            return 'started';
+        case STATES.CONNECTED:
+            return 'connected';
+        case STATES.STOPPING:
+            return 'stopping';
+        case STATES.STOPPED:
+            return 'stopped';
+        case STATES.ERROR:
+            return 'error';
         }
     }
 
@@ -125,7 +129,7 @@ class EthereumNode extends EventEmitter {
     init () {
 
 
-        const ipcPath = getIpcPath();
+        const ipcPath = getIpcPath(this.defaultNodeType);
 
         // TODO: if connection to external node is successful then query it to
         // determine node and network type
@@ -262,7 +266,7 @@ class EthereumNode extends EventEmitter {
      * @return {Promise}
      */
     _start (nodeType, network) {
-        const ipcPath = getIpcPath();
+        const ipcPath = getIpcPath(this.defaultNodeType);
 
         log.info(`Start node: ${nodeType} ${network}`);
 
@@ -296,8 +300,8 @@ class EthereumNode extends EventEmitter {
                 this._saveUserData('daoFork', this.daoFork);
 
                 return this._socket.connect({ path: ipcPath }, {
-                        timeout: 30000 /* 30s */
-                    })  
+                    timeout: 30000 /* 30s */
+                })  
                     .then(() => {
                         this.state = STATES.CONNECTED;
                     })
@@ -364,24 +368,21 @@ class EthereumNode extends EventEmitter {
                     return reject(err);
                 }
 
-                let args;
+                let args = ({
+                    main: {
+                        geth: () => ['--fast', '--cache', '512'],
+                        eth: () => ['--unsafe-transactions'],
+                        parity: () => []
+                    },
+                    test: {
+                        geth: () => ['--testnet', '--fast', '--ipcpath',
+                                     getIpcPath(this.defaultNodeType)],
+                        eth: () => ['--morden', '--unsafe-transactions'],
+                        parity: () => ['--chain', "morden",
+                                       '--ipc-path', getIpcPath(this.defaultNodeType) ]
+                    }
+                })[network][nodeType]()
 
-                // START TESTNET
-                if ('test' == network) {
-                    args = (nodeType === 'geth') 
-                        ? ['--testnet', '--fast', '--ipcpath', getIpcPath()] 
-                        : ['--morden', '--unsafe-transactions'];
-                } 
-                // START MAINNET
-                else {
-                    args = (nodeType === 'geth') 
-                        ? ['--fast', '--cache', '512'] 
-                        : ['--unsafe-transactions'];
-
-                    // FORK RELATED
-                    if(nodeType === 'geth' && this.daoFork)
-                        args.push((this.daoFork === 'true') ? '--support-dao-fork' : '--oppose-dao-fork');
-                }
 
                 let nodeOptions = Settings.nodeOptions;
 
@@ -391,8 +392,10 @@ class EthereumNode extends EventEmitter {
                     args = args.concat(nodeOptions);
                 }
 
+
                 log.trace('Spawn', binPath, args);
 
+                console.log("spawn", binPath, args)
                 const proc = spawn(binPath, args);
 
                 // node has a problem starting
@@ -416,6 +419,7 @@ class EthereumNode extends EventEmitter {
 
                 // when proc outputs data
                 proc.stdout.on('data', (data) => {
+                    console.log("stdout data:", data.toString())
                     log.trace('Got stdout data');
 
                     this.emit('data', data);
@@ -442,6 +446,7 @@ class EthereumNode extends EventEmitter {
 
                 // when proc outputs data in stderr
                 proc.stderr.on('data', (data) => {
+                    console.log("stderr data:", data.toString())
                     log.trace('Got stderr data');
 
                     this.emit('data', data);
@@ -453,10 +458,10 @@ class EthereumNode extends EventEmitter {
                 // when data is first received
                 this.once('data', () => {
                     /*
-                        We wait a short while before marking startup as successful 
-                        because we may want to parse the initial node output for 
-                        errors, etc (see geth port-binding error above)
-                    */
+                     We wait a short while before marking startup as successful 
+                     because we may want to parse the initial node output for 
+                     errors, etc (see geth port-binding error above)
+                     */
                     setTimeout(() => {
                         if (STATES.STARTING === this.state) {
                             log.info(`${NODE_START_WAIT_MS}ms elapsed, assuming node started up successfully`);
@@ -513,7 +518,10 @@ class EthereumNode extends EventEmitter {
 
         this.defaultNodeType = Settings.nodeType || this._loadUserData('node') || DEFAULT_NODE_TYPE;
         this.defaultNetwork = Settings.network || this._loadUserData('network') || DEFAULT_NETWORK;
-        
+
+        console.log("##### node", this.defaultNodeType)
+        console.log(Settings.nodeType, this._loadUserData('node'), DEFAULT_NODE_TYPE)
+
         // FORK RELATED
         this.daoFork = this._loadUserData('daoFork');
     }

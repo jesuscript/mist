@@ -35,7 +35,7 @@ const argv = require('yargs')
         node: {
             demand: false,
             default: null,
-            describe: 'Node to use: geth, eth',
+            describe: 'Node to use: parity, geth, eth',
             requiresArg: true,
             nargs: 1,
             type: 'string',

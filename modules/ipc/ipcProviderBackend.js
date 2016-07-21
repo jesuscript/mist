@@ -14,7 +14,7 @@ const fs = require('fs');
 const path = require('path');
 
 const log = require('../utils/logger').create('ipcProviderBackend');
-const ipcPath = require('./getIpcPath')();
+const getIpcPath = require('./getIpcPath');
 const Sockets = require('../sockets');
 const ethereumNode = require('../ethereumNode');
 const Windows = require('../windows');
@@ -149,7 +149,7 @@ class IpcProviderBackend {
                     })
                     .then(() => {
                         return socket.connect({
-                            path: ipcPath,
+                            path: getIpcPath(ethereumNode.defaultNodeType),
                         }, {
                             timeout: 5000,
                         });

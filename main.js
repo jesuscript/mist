@@ -192,6 +192,8 @@ var onReady = function() {
     appMenu();
 
     // Create the browser window.
+    
+    console.log("### mode:", Settings.uiMode)
 
     // MIST
     if(Settings.uiMode === 'mist') {
@@ -211,6 +213,8 @@ var onReady = function() {
 
     // WALLET
     } else {
+        console.log("### create main")
+        
         mainWindow = Windows.create('main', {
             primary: true,
             electronOptions: {
@@ -223,6 +227,8 @@ var onReady = function() {
                 }
             }
         });
+
+        console.log("### main created")
     }
 
     if (!Settings.inAutoTestMode) {
