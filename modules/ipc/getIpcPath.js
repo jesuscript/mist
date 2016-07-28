@@ -9,7 +9,7 @@ const log = require('../utils/logger').create('getIpcPath');
 const Settings = require('../settings');
 
 
-module.exports = function(nodeType) {
+module.exports = function(nodeType = "geth") {
     var ipcPath = Settings.ipcPath;
     if (ipcPath) {
         return ipcPath;

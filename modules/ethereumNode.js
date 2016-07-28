@@ -395,7 +395,7 @@ class EthereumNode extends EventEmitter {
 
                 log.trace('Spawn', binPath, args);
 
-                console.log("spawn", binPath, args)
+
                 const proc = spawn(binPath, args);
 
                 // node has a problem starting

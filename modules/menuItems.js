@@ -372,6 +372,15 @@ var menuTempl = function(webviews) {
                 click: function(){
                     restartNode('eth');
                 }
+              },
+              {
+                label: 'Parity (Rust)',
+                checked: ethereumNode.isOwnNode && ethereumNode.isParity,
+                enabled: ethereumNode.isOwnNode,
+                type: 'checkbox',
+                click: function(){
+                    restartNode('parity');
+                }
               }
         ]});
     }

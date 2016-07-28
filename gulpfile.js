@@ -379,7 +379,8 @@ gulp.task('change-files', ['create-binaries'], function() {
             : path +'/resources/node';
 
 
-
+        //TODO: DRY
+        
         // copy eth node binaries
         streams.push(gulp.src([
             './nodes/eth/'+ os + '/*'
@@ -392,6 +393,11 @@ gulp.task('change-files', ['create-binaries'], function() {
             ])
             .pipe(gulp.dest(destPath +'/geth')));
 
+        streams.push(gulp.src([
+            './nodes/parity/'+ os + '/*'
+            ])
+            .pipe(gulp.dest(destPath +'/parity')));
+        
     });
 
 
