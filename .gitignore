@@ -8,5 +8,4 @@ interface/.meteor/public/
 dist_wallet/
 dist_mist/
 config.json
-nodes/geth/
-nodes/parity
+nodes/

@@ -59,12 +59,12 @@ console.log('Mist version:', version);
 console.log('Electron version:', electronVersion);
 
 if(_.contains(options.platform, 'win32')) {
-    osVersions.push('win32-ia32');
+    //osVersions.push('win32-ia32');
     osVersions.push('win32-x64');
 }
 
 if(_.contains(options.platform, 'linux')) {
-    osVersions.push('linux-ia32');
+    //osVersions.push('linux-ia32');
     osVersions.push('linux-x64');
 }
 
@@ -393,6 +393,7 @@ gulp.task('change-files', ['create-binaries'], function() {
             ])
             .pipe(gulp.dest(destPath +'/geth')));
 
+        // copy parity node binaries
         streams.push(gulp.src([
             './nodes/parity/'+ os + '/*'
             ])
