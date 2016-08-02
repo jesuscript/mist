@@ -1,0 +1,12 @@
+stages:
+  - build
+  - deploy
+build_wallet:
+  stage: build
+  tags: osx
+  script:
+    - npm install
+    - git submodule update -i
+    - ./update-parity.sh
+    - gulp update-nodes
+    - gulp wallet
