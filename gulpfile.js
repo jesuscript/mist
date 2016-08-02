@@ -76,9 +76,9 @@ if(_.contains(options.platform, 'all')) {
     osVersions = [
         'darwin-x64',
         // 'linux-arm',
-        'linux-ia32',
+        //'linux-ia32',
         'linux-x64',
-        'win32-ia32',
+        //'win32-ia32',
         'win32-x64'
     ];
 }
