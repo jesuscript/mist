@@ -306,7 +306,7 @@ gulp.task('create-binaries', ['copy-i18n'], function(cb) {
         out: './dist_'+ type +'/',
         name: filenameUppercase,
         platform: options.platform.join(','),
-        arch: 'all',
+        arch: 'x64',
         icon: './icons/'+ type +'/icon.icns',
         version: electronVersion,
         'app-version': version,
