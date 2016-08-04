@@ -1,5 +1,12 @@
 #!/bin/bash
 
+echo "Deploying builds from dist_wallet/"
+
+if [ ! -d dist_wallet ]; then
+	echo "Directory not found"
+	exit 1
+fi
+
 for build_path in dist_wallet/*
 do
 	if [ -d "${build_path}" ]; then
@@ -15,3 +22,5 @@ do
 		fi
 	fi
 done
+
+echo "Deploy finished"

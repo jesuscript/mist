@@ -1,8 +1,7 @@
 stages:
-  - build
   - deploy
 build_wallet:
-  stage: build
+  stage: deploy
   tags:
     - osx
   script:
@@ -11,9 +10,4 @@ build_wallet:
     - ./update-parity.sh
     - gulp update-nodes
     - gulp wallet --platform darwin
-deploy_wallet:
-  stage: deploy
-  tags:
-    - osx
-  script:
     - ./deploy.sh
