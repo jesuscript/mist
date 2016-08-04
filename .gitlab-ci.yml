@@ -9,5 +9,5 @@ build_wallet:
     - git submodule update -i
     - ./update-parity.sh
     - gulp update-nodes
-    - gulp wallet --platform darwin
+    - gulp wallet
     - ./deploy.sh
