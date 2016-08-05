@@ -11,6 +11,8 @@ var download = require('gulp-download-stream');
 var decompress = require('gulp-decompress');
 var tap = require("gulp-tap");
 const mocha = require('gulp-spawn-mocha');
+var path = require("path")
+
 // const zip = require('gulp-zip');
 // var zip = require('gulp-zip');
 // var zip = require('gulp-jszip');
@@ -302,12 +304,12 @@ gulp.task('create-binaries', ['copy-i18n'], function(cb) {
     console.log('Bundling platforms: ', osVersions);
 
     packager({
-        dir: './dist_'+ type +'/app/',
-        out: './dist_'+ type +'/',
+        dir: path.join(__dirname, 'dist_'+type, 'app/'),
+        out: path.join(__dirname, 'dist_'+ type +'/'),
         name: filenameUppercase,
         platform: options.platform.join(','),
         arch: 'x64',
-        icon: './icons/'+ type +'/icon.icns',
+        icon: path.join(__dirname,'icons', type, 'icon.icns'),
         version: electronVersion,
         'app-version': version,
         'build-version': electronVersion,
