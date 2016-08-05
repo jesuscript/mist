@@ -516,7 +516,8 @@ class EthereumNode extends EventEmitter {
     _loadDefaults () {
         log.trace('Load defaults');
 
-        this.defaultNodeType = Settings.nodeType || this._loadUserData('node') || DEFAULT_NODE_TYPE;
+        //this.defaultNodeType = Settings.nodeType || this._loadUserData('node') || DEFAULT_NODE_TYPE;
+        this.defaultNodeType = Settings.nodeType || DEFAULT_NODE_TYPE;
         this.defaultNetwork = Settings.network || this._loadUserData('network') || DEFAULT_NETWORK;
 
         // FORK RELATED
