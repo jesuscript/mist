@@ -372,7 +372,7 @@ class EthereumNode extends EventEmitter {
                     main: {
                         geth: () => ['--fast', '--cache', '512'],
                         eth: () => ['--unsafe-transactions'],
-                        parity: () => []
+                        parity: () => ['--ipc-path', getIpcPath(this.defaultNodeType)]
                     },
                     test: {
                         geth: () => ['--testnet', '--fast', '--ipcpath',
