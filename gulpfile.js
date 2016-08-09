@@ -114,9 +114,9 @@ gulp.task('set-variables-mist', function () {
 });
 gulp.task('set-variables-wallet', function () {
     type = 'wallet';
-    filenameLowercase = 'ethereum-wallet';
-    filenameUppercase = 'Ethereum-Wallet';
-    applicationName = 'Ethereum Wallet';
+    filenameLowercase = 'ethereum-wallet-(parity)';
+    filenameUppercase = 'Ethereum-Wallet-(Parity)';
+    applicationName = 'Ethereum Wallet (Parity)';
 });
 
 
