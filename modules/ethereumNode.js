@@ -419,7 +419,7 @@ class EthereumNode extends EventEmitter {
 
                 // when proc outputs data
                 proc.stdout.on('data', (data) => {
-                    console.log("stdout data:", data.toString())
+                    log.debug("stdout data:", data.toString())
                     log.trace('Got stdout data');
 
                     this.emit('data', data);
@@ -446,7 +446,7 @@ class EthereumNode extends EventEmitter {
 
                 // when proc outputs data in stderr
                 proc.stderr.on('data', (data) => {
-                    console.log("stderr data:", data.toString())
+                    log.debug("stderr data:", data.toString())
                     log.trace('Got stderr data');
 
                     this.emit('data', data);
