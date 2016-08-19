@@ -116,6 +116,15 @@ const argv = require('yargs')
             group: 'Mist options:',
             type: 'boolean',
         },
+        'snapshot-url': {
+            demand: false,
+            requiresArg: true,
+            describe: 'A URL to download a parity snapshot from',
+            group: 'Mist options:',
+            nargs: 1,
+            type: 'string',
+            default: "http://d2studw12lglla.cloudfront.net/snapshots/2000000.snp"
+        },
         '': {
             describe: 'All options prefixed with --node- (e.g. "--node-datadir") will be passed onto the client (e.g. Geth).',
             group: 'Node options:',
@@ -221,7 +230,9 @@ class Settings {
     return argv.nodeOptions;
   }
 
-
+  get snapshotUrl(){
+    return argv["snapshot-url"]
+  }
 }
 
 module.exports = new Settings();

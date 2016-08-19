@@ -5,7 +5,9 @@ const log = require('./utils/logger').create('EthereumNode');
 const electron = require('electron');
 const app = electron.app;
 const ipc = electron.ipcMain;
-const spawn = require('child_process').spawn;
+const request = require('request');
+const progress = require('request-progress');
+const {spawn,exec} = require('child_process');
 const Windows = require('./windows.js');
 const logRotate = require('log-rotate');
 const dialog = electron.dialog;
@@ -134,6 +136,7 @@ class EthereumNode extends EventEmitter {
         // determine node and network type
 
         // check if the node is already running
+
         return this._socket.connect({path: ipcPath})
             .then(()=> {
                 this.state = STATES.CONNECTED;
@@ -241,6 +244,56 @@ class EthereumNode extends EventEmitter {
         return this._loadUserData('node.log');
     }
 
+    loadSnapshot(opt) {
+        var snapshotUrl = Settings.snapshotUrl,
+            fileName = "parity.snapshot",
+            filePath = this._buildFilePath(fileName)
+        
+        return new Q((resolve, reject) => {
+            log.debug("Snapshot URL:", snapshotUrl)
+
+            progress(request(snapshotUrl))
+                .on("progress", (state) => {
+                    opt.onDownload(Math.round(state.percentage*100))
+                })
+                .on("error", reject)
+                .on("end", () => {
+                    log.debug("download complete")
+
+                    resolve()
+                })
+                .pipe(fs.createWriteStream(filePath))
+
+        }).then(() => {
+            return new Q((resolve, reject) => {
+                log.info("Restoring db from a snapshot")
+                
+                opt.onRestore()
+                
+                var restore = spawn(getNodePath("parity"), ["restore", filePath])
+
+                restore.stderr.on('data', (data) => {
+                    log.debug(data.toString())
+                    var match = data.toString()
+                            .match(/Processed\s([0-9]*)\/([0-9]*)[^0-9]*([0-9]*)\/([0-9]*)/)
+
+                    if(match) opt.onRestore({
+                        stateChunks: {current: match[1], max: match[2]},
+                        blockChunks: {current: match[3], max: match[4]}
+                    })
+                })
+
+                restore.on("close", (code)=>{
+                    if (code !== 0) {
+                        reject(`restore exited with code ${code}`)
+                    }else{
+                        resolve()
+                    }
+                })
+            })
+        })
+    }
+
 
 
     /** 
@@ -256,6 +309,7 @@ class EthereumNode extends EventEmitter {
         });
     }
 
+    
 
 
     /**
@@ -265,6 +319,7 @@ class EthereumNode extends EventEmitter {
      * @return {Promise}
      */
     _start (nodeType, network) {
+        
         const ipcPath = getIpcPath(this.defaultNodeType);
 
         log.info(`Start node: ${nodeType} ${network}`);
@@ -274,7 +329,7 @@ class EthereumNode extends EventEmitter {
         if (isTestNet) {
             log.debug('Node will connect to the test network');
         }
-
+        
         return this.stop()
             .then(() => {
                 return this.__startNode(nodeType, network)
@@ -294,10 +349,12 @@ class EthereumNode extends EventEmitter {
 
                 this._saveUserData('node', this._type);
                 this._saveUserData('network', this._network);
-
+                
                 // FORK RELATED
                 this._saveUserData('daoFork', this.daoFork);
 
+                this._saveUserData('snapshot', this.snapshotLoaded);
+                
                 return this._socket.connect({ path: ipcPath }, {
                     timeout: 30000 /* 30s */
                 })  
@@ -372,14 +429,16 @@ class EthereumNode extends EventEmitter {
                     main: {
                         geth: () => ['--fast', '--cache', '512'],
                         eth: () => ['--unsafe-transactions'],
-                        parity: () => ['--ipc-path', getIpcPath(this.defaultNodeType)]
+                        parity: () => ['--ipc-path', getIpcPath(this.defaultNodeType),
+                                       '--no-dapps', '--no-signer']
                     },
                     test: {
                         geth: () => ['--testnet', '--fast', '--ipcpath',
                                      getIpcPath(this.defaultNodeType)],
                         eth: () => ['--morden', '--unsafe-transactions'],
                         parity: () => ['--chain', "morden",
-                                       '--ipc-path', getIpcPath(this.defaultNodeType) ]
+                                       '--ipc-path', getIpcPath(this.defaultNodeType),
+                                       '--no-dapps', '--no-signer']
                     }
                 })[network][nodeType]()
 
@@ -522,6 +581,7 @@ class EthereumNode extends EventEmitter {
 
         // FORK RELATED
         this.daoFork = this._loadUserData('daoFork');
+        this.snapshotLoaded = this._loadUserData('snapshot');
     }
 
 

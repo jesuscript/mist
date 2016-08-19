@@ -84,13 +84,13 @@ if(Settings.uiMode === 'wallet') {
         ? 'file://' + __dirname + '/interface/index.html'
         : 'http://localhost:3000';
 
-// MIST
+    // MIST
 } else {
     log.info('Starting in Mist mode');
 
     let url = (Settings.inProductionMode)
-        ? 'file://' + __dirname + '/interface/index.html'
-        : 'http://localhost:3000';
+            ? 'file://' + __dirname + '/interface/index.html'
+            : 'http://localhost:3000';
 
     if (Settings.cli.resetTabs) {
         url += '?reset-tabs=true'
@@ -137,14 +137,14 @@ app.on('before-quit', function(event){
         // delay quit, so the sockets can close
         setTimeout(function(){
             ethereumNode.stop()
-            .then(function() {
-                killedSocketsAndNodes = true;
+                .then(function() {
+                    killedSocketsAndNodes = true;
 
-                return db.close();
-            })
-            .then(function() {
-                app.quit(); 
-            });
+                    return db.close();
+                })
+                .then(function() {
+                    app.quit(); 
+                });
 
         }, 500);
     } else {
@@ -193,8 +193,6 @@ var onReady = function() {
 
     // Create the browser window.
     
-    console.log("### mode:", Settings.uiMode)
-
     // MIST
     if(Settings.uiMode === 'mist') {
         mainWindow = Windows.create('main', {
@@ -211,10 +209,8 @@ var onReady = function() {
             }
         });
 
-    // WALLET
+        // WALLET
     } else {
-        console.log("### create main")
-        
         mainWindow = Windows.create('main', {
             primary: true,
             electronOptions: {
@@ -227,8 +223,6 @@ var onReady = function() {
                 }
             }
         });
-
-        console.log("### main created")
     }
 
     if (!Settings.inAutoTestMode) {
@@ -284,8 +278,8 @@ var onReady = function() {
         // state change
         ethereumNode.on('state', function(state, stateAsText) {
             Windows.broadcast('uiAction_nodeStatus', stateAsText,
-                ethereumNode.STATES.ERROR === state ? ethereumNode.lastError : null
-            );
+                              ethereumNode.STATES.ERROR === state ? ethereumNode.lastError : null
+                             );
         });
 
 
@@ -313,8 +307,67 @@ var onReady = function() {
             });
         });
 
+        const snapshotPromise = new Q((resolve, reject) => {
+            if(ethereumNode.snapshotLoaded) return resolve()
+            
+            Windows.broadcast("uiAction_nodeStatus", "busy")
+            
+            var snapshotWindow = Windows.createPopup('snapshot', {
+                primary: true,
+                electronOptions: {
+                    width: 480,
+                    height: 250
+                }
+            })
+
+            snapshotWindow.on("close" ,() => {
+                resolve();
+            })
+
+            ipc.on("snapshot_chosen", (e, loadFromSnapshot) => {
+                snapshotWindow.removeAllListeners("close")
+                snapshotWindow.close()
+
+                ipc.removeAllListeners("snapshot_chosen")
+
+                log.debug("Load from a snapshot?", loadFromSnapshot)
+
+                
+                if(!loadFromSnapshot){
+                    ethereumNode.snapshotLoaded = "no"
+                    return resolve()
+                } 
+
+                ethereumNode.loadSnapshot({
+                    onDownload: (pcntDone) => {
+                        Windows.broadcast('uiAction_nodeStatus', 'busy', {
+                            reason: "downloadingSnapshot",
+                            percentDone: pcntDone
+                        })
+                    },
+                    onRestore: (status) => {
+                        Windows.broadcast('uiAction_nodeStatus', 'busy', {
+                            reason: "restoringFromSnapshot",
+                            status
+                        })
+                    }
+                }).then(()=>{ ethereumNode.snapshotLoaded = "yes"; })
+                    .then(resolve)
+                    .catch((err) => {
+                        log.error('Error loading from a snapshot:', err);
+                        app.quit()
+
+                        reject()
+
+                        throw new Error('Error loading from a snapshot')
+                    });
+            })
+        })
+
+
         // go!
-        ethereumNode.init()
+        snapshotPromise
+            .then(() => ethereumNode.init())
             .then(function sanityCheck() {
                 if (!ethereumNode.isIpcConnected) {
                     throw new Error('Either the node didn\'t start or IPC socket failed to connect.')
@@ -325,8 +378,7 @@ var onReady = function() {
 
                 // update menu, to show node switching possibilities
                 appMenu();
-            })
-            // FORK RELATED
+            })// FORK RELATED
             .then(function hardForkOption() {
                 // open the fork popup
                 if (ethereumNode.isMainNetwork && !ethereumNode.daoFork) {
@@ -464,10 +516,10 @@ var onReady = function() {
 
 
 /**
-Start the main window and all its processes
+ Start the main window and all its processes
 
-@method startMainWindow
-*/
+ @method startMainWindow
+ */
 var startMainWindow = function() {
     log.info('Loading Interface at '+ global.interfaceAppUrl);
 

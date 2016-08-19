@@ -1,0 +1,14 @@
+* TODO fix the UI not updating after a catch-up
+* TODO detect when the client is migrating the DB and wait
+* TODO snapshots
+** TODO the dialog
+** DONE make and upload a snapshot (latest)
+   CLOSED: [2016-08-18 Thu 19:06]
+** TODO make a snapshot at 2,000,000'th block
+** TODO snapshot restore menu option
+** TODO url as a cli arg
+** TODO uncomment saveUserData in ethereumNode
+* TODO code signing
+* TODO checksums
+* TODO rename the mist s3 bucket
+

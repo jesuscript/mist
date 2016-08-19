@@ -1,20 +1,50 @@
 <template name="elements_networkIndicator">
     <div class="network-indicator">
         {{#if $eq (TemplateVar.get "network") "unknown"}}
-            <div class="unknown indicator" title="Network not yet known"> 
-                {{i18n "mist.nodeInfo.checkingWhichNetwork"}} 
+            <div class="unknown indicator" title="Network not yet known">
+                {{i18n "mist.nodeInfo.checkingWhichNetwork"}}
             </div>
         {{/if}}
 
         {{#if $eq (TemplateVar.get "network") "testnet"}}
             <div class="testnet indicator" title="This is the global Morden test network">
-                {{i18n "mist.nodeInfo.testNetwork"}} 
+                {{i18n "mist.nodeInfo.testNetwork"}}
             </div>
         {{/if}}
 
         {{#if $eq (TemplateVar.get "network") "privatenet"}}
             <div class="devnet indicator" title="This is a developer network">
-                {{i18n "mist.nodeInfo.privateNetwork"}}                 
+                {{i18n "mist.nodeInfo.privateNetwork"}}
+            </div>
+        {{/if}}
+
+        {{#if $eq (TemplateVar.get "network") "busy"}}
+            <div class="busy indicator" title="Client is busy">
+                {{#with TemplateVar.get "busyDetails" }}
+                    {{#if $eq reason "downloadingSnapshot"}}
+                        <p>
+                            {{i18n "mist.nodeInfo.busy.downloadingSnapshot"}}
+                        </p>
+                        <p>
+                            {{i18n "mist.nodeInfo.busy.downloadProgress"  percentDone=percentDone}}
+                        </p>
+                    {{/if}}
+                    {{#if $eq reason "restoringFromSnapshot" }}
+                        <p>
+                            {{i18n "mist.nodeInfo.busy.restoringFromSnapshot"}}
+                        </p>
+                        {{#if $exists status }}
+                            <p>
+                                {{i18n "mist.nodeInfo.busy.restoreProgress"
+                                  stateCurrent=status.stateChunks.current
+                                  stateMax=status.stateChunks.max
+                                  blocksCurrent=status.blockChunks.current
+                                  blocksMax=status.blockChunks.max
+                                }}
+                            </p>
+                        {{/if}}
+                    {{/if}}
+                {{/with}}
             </div>
         {{/if}}
     </div>

@@ -103,7 +103,13 @@
             "testnetExplain": "You are on the testnet, DO NOT SEND any real ether to these addresses",
             "privatenetExplain": "You are on a private net, DO NOT SEND any real ether to these addresses",
             "unknownnetExplain": "Unable to determine which network you are on",
-            "peers": "peers"
+            "peers": "peers",
+            "busy": {
+                "downloadingSnapshot": "Downloading a database snapshot",
+                "downloadProgress": "__percentDone__% completed",
+                "restoringFromSnapshot": "Restoring the database from a snapshot",
+                "restoreProgress": "Processed __stateCurrent__/__stateMax__ state chunks and __blocksCurrent__/__blocksMax__ block chunks"
+            }
         },
         "sidebar": {
             "buttons": {
@@ -240,6 +246,12 @@
                 "choice" : "<strong> This is a settings configuration, <em>not a vote</em></strong>, meaning that your wallet will operate on the blockchain of your choosing regardless of any other user's choice. Your ether and assets will exist in both chains and you will be able to switch back at a later date by resyncing your wallet.",
                 "question": "Do you want to activate the chain in which funds linked to the exploit are restored to a contract where they can be withdrawn by \"The DAO\" token holders?",
                 "disclaimer": "READ THE ETHEREUM DISCLAIMER FIRST",
+                "yes": "yes",
+                "no": "no"
+            },
+            "snapshot": {
+                "title": "Would you like to sync from a snapshot?",
+                "description": "Snapshotting allows for an extremely fast synchronisation that skips almost all of the block processing, simply injecting the appropriate data directly into the database.",
                 "yes": "yes",
                 "no": "no"
             }
